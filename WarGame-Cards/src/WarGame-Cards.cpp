@@ -72,7 +72,7 @@ enum Suits
     SUIT_DIAMOND,
     SUIT_HEART,
     SUIT_SPADE,
-    
+
     SUIT_JOKER
 };
 
@@ -93,9 +93,9 @@ const char *SuitNames[] =
 enum Ranks
 {
     RANK_LOW,
-    
+
     RANK_UNUSED1,
-    
+
     RANK_TWO,
     RANK_THREE,
     RANK_FOUR,
@@ -109,7 +109,7 @@ enum Ranks
     RANK_QUEEN,
     RANK_KING,
     RANK_ACE,
-    
+
     RANK_WILD_HIGH
 };
 
@@ -153,16 +153,16 @@ class Card
 private:
     Suits  suit_;
     Ranks  rank_;
-    
+
     Card *pNext_;
     Card *pPrevious_;
-    
+
     static unsigned int masterCardCount_;  // The master count to keep track of how many cards were created
     unsigned int id_;   // An internal ID to keep track of the card creation in the deck
                         // particularly when returning a card to an empty deck.
-    
+
 public:
-    
+
     // ---------------------------------------------------------------------------------
     // Constructor
     // ---------------------------------------------------------------------------------
@@ -183,7 +183,7 @@ public:
     {
         return masterCardCount_;
     }
-    
+
     // ---------------------------------------------------------------------------------
     // getId - returns the internal ID of the card
     // ---------------------------------------------------------------------------------
@@ -199,7 +199,7 @@ public:
     {
         return suit_;
     }
-    
+
     // ---------------------------------------------------------------------------------
     // getRank - returns the rank of this card
     // ---------------------------------------------------------------------------------
@@ -226,7 +226,7 @@ public:
         }
         this->pPrevious_ = NULL;
         this->pNext_ = NULL;
-        
+
         return this;
     }
 
@@ -241,7 +241,7 @@ public:
         {
             pThis = pThis->pPrevious_;
         }
-        
+
         return pThis;
     }
 
@@ -256,7 +256,7 @@ public:
         {
             pThis = pThis->pNext_;
         }
-        
+
         return pThis;
     }
 
@@ -288,10 +288,10 @@ public:
             ++thisCount;
             pThis = pThis->pNext_;
         }
-        
+
         return thisCount;
     }
-    
+
     // ---------------------------------------------------------------------------------
     // add - add a card to the end of a list of cards
     // NOTE: This function will traverse the list from the current card to
@@ -304,29 +304,26 @@ public:
 
         if (this != aCard)
         {
-        
+
             // Traverse this list from this point to the end
             Card *pThis = this;
             while (pThis->pNext_ != NULL)
             {
                 pThis = pThis->pNext_;
             }
-            
+
             // Remove the card we are adding from whatever list it belonged
             aCard->remove();
-            
+
             // Add the card to this list
             pThis->pNext_ = aCard;
             aCard->pPrevious_ = pThis;
         }
-        else
-        {
-            pNext = pNext;
-        }
+
         // Return the next card from the list from which we removed a card
         return pNext;
     }
-    
+
     // ---------------------------------------------------------------------------------
     // insertAfter - insert a card into a list of cards after the current card
     // ---------------------------------------------------------------------------------
@@ -336,19 +333,19 @@ public:
         {
             // Remove the card we are inserting from whatver list it belonged
             aCard->remove();
-            
+
             // Insert
             aCard->pNext_ = this->pNext_;
             aCard->pPrevious_ = this;
             this->pNext_ = aCard;
-            
+
             if (aCard->pNext_ != NULL)
             {
                 // This card is not at the end of the list
                 aCard->pNext_->pPrevious_ = aCard;
             }
         }
-        
+
         return aCard;
     }
 
@@ -361,22 +358,22 @@ public:
         {
             // Remove the card we are inserting from whatver list it belonged
             aCard->remove();
-            
+
             // Insert
             aCard->pPrevious_ = this->pPrevious_;
             aCard->pNext_ = this;
             this->pPrevious_ = aCard;
-            
+
             if (aCard->pPrevious_ != NULL)
             {
                 // This card is not at the beginning of the list
                 aCard->pPrevious_->pNext_ = aCard;
             }
         }
-        
+
         return aCard;
     }
-    
+
     // ---------------------------------------------------------------------------------
     // showCards - simple display function to see the suit and rank of a card in
     // a specific position
@@ -386,19 +383,19 @@ public:
         // Find the top of the deck by picking any card and traversing the
         // previous pointers until NULL is found
         Card *pThis = this->getFirst();
-        
+
         unsigned int i = 1;
         do
         {
             printf("CARD %3d: %8s of %8s\n", i, RankNames[pThis->getRank()], SuitNames[pThis->getSuit()]);
-            
+
             ++i;
             pThis = pThis->getNext();
-            
+
         } while (pThis != NULL);
-        
+
     }
-    
+
 };
 unsigned int Card::masterCardCount_ = 0;
 
@@ -429,11 +426,11 @@ private:
     Card **ppCards_;
     bool *pPresentInDeck_;
     bool jokersInDeck_;
-    
+
     Card *pTopOfDeck_;
 
 protected:
-    
+
 public:
     // ---------------------------------------------------------------------------------
     // Constructor
@@ -444,14 +441,14 @@ public:
         jokersInDeck_ = (aKeepJokers == JPT_KEEP_JOKERS);
         unsigned int singleDeckSize = STANDARD_DECK_SIZE - ((jokersInDeck_? 0 : 2));
         deckSize_ = aNumberOfDecks * singleDeckSize;
-        
+
         ppCards_ = new Card*[deckSize_];
         pPresentInDeck_ = new bool[deckSize_];
-        
+
         for (unsigned int currentDeck = 0; currentDeck < aNumberOfDecks; ++currentDeck)
         {
             unsigned int currentCard = currentDeck * singleDeckSize;
-            
+
             for (int thisSuit = SUIT_CLUB; thisSuit <= SUIT_SPADE; ++thisSuit)
             {
                 for (int thisRank = RANK_TWO; thisRank <= RANK_ACE; ++thisRank)
@@ -459,10 +456,10 @@ public:
                     ppCards_[currentCard] = new Card((Suits)thisSuit, (Ranks)thisRank);
                     pPresentInDeck_[currentCard] = true;
                     ++currentCard;
-                    
+
                 }
             }
-            
+
             if (jokersInDeck_)
             {
                 // Fill the rest of the deck with jokers
@@ -473,15 +470,15 @@ public:
                 }
             }
         }
-        
+
         // Starting with the second card, link the cards together
         for (unsigned int currentCard = 1; currentCard < deckSize_; ++currentCard)
         {
             ppCards_[currentCard-1]->add(ppCards_[currentCard]);
         }
-        
+
         pTopOfDeck_ = ppCards_[0];
-        
+
     }
 
     // ---------------------------------------------------------------------------------
@@ -496,7 +493,7 @@ public:
         }
         DELETE_POINTER_ARRAY(pPresentInDeck_);
         DELETE_POINTER_ARRAY(ppCards_);
-        
+
     }
 
     // ---------------------------------------------------------------------------------
@@ -506,7 +503,7 @@ public:
     {
         return deckSize_;
     }
-    
+
     // ---------------------------------------------------------------------------------
     // showCards - simple display function to see the suit and rank of a card in
     // a specific position
@@ -522,7 +519,7 @@ public:
             printf("Deck is Empty\n");
         }
     }
-    
+
     // ---------------------------------------------------------------------------------
     // gather - returns all cards to the deck by attaching them to the same list.
     // Any references (e.g., Hands) should be cleared in response to a Deck::gather().
@@ -552,7 +549,7 @@ public:
     {
         // Seed the random number generator
         srand((unsigned int)(time(NULL) & 0xFFFFFFFF));
-                   
+
         for (unsigned int shuffleCount = 0; shuffleCount < aNumberOfShuffles; ++shuffleCount)
         {
             // Considering the deck size, perform 100x passes
@@ -563,14 +560,14 @@ public:
                 {
                     unsigned int indexA = rand() % deckSize_;
                     unsigned int indexB = rand() % deckSize_;
-                    
+
                     // Put card A before card B
                     ppCards_[indexB]->insertBefore(ppCards_[indexA]);
 
                 }
             }
         }
-        
+
         pTopOfDeck_ = pTopOfDeck_->getFirst();
     }
 
@@ -580,23 +577,23 @@ public:
     Card * deal(void)
     {
         Card *pCard = NULL;
-        
+
         if (pTopOfDeck_ != NULL)
         {
             Card *pNext = pTopOfDeck_->getNext();
-            
+
             pCard = pTopOfDeck_->remove();
-        
+
             pTopOfDeck_ = pNext;
         }
-        
+
         return pCard;
     }
-    
+
     // ---------------------------------------------------------------------------------
     // push - pushes the card back into the deck
     // ---------------------------------------------------------------------------------
-    
+
 };
 unsigned int Deck::deckSize_ = 0;
 
@@ -613,12 +610,12 @@ unsigned int Deck::deckSize_ = 0;
 //{
 //private:
 //    Card **ppCards_;
-//    
+//
 //    Card *pFirst_;
 //    Card *pLast_;
-//    
+//
 //protected:
-//    
+//
 //public:
 //    // ---------------------------------------------------------------------------------
 //    // Constructor
@@ -640,7 +637,7 @@ unsigned int Deck::deckSize_ = 0;
 //            ppCards_ = NULL;
 //        }
 //    }
-//    
+//
 //    // ---------------------------------------------------------------------------------
 //    // Destructor
 //    // ---------------------------------------------------------------------------------
@@ -648,7 +645,7 @@ unsigned int Deck::deckSize_ = 0;
 //    {
 //        DELETE_POINTER_ARRAY(ppCards_);
 //    }
-//    
+//
 //    // ---------------------------------------------------------------------------------
 //    // add - assigns a card to the hand
 //    // ---------------------------------------------------------------------------------
@@ -665,10 +662,10 @@ unsigned int Deck::deckSize_ = 0;
 //                pLast_->add(pCard);
 //            }
 //        }
-//        
+//
 //        return pCard;
 //    }
-//    
+//
 //};
 
 // ---------------------------------------------------------------------------------
@@ -679,14 +676,14 @@ int main(int argc, const char * argv[])
 {
     Deck *pDeck = new Deck(NUMBER_OF_DECKS, Deck::JPT_NO_JOKERS);   // Remove jokers
     Deck &deck = *pDeck;
-    
+
     deck.showCards();
-    
+
     printf("\n\nShuffling...\n\n");
     deck.shuffle();
-    
+
     deck.showCards();
-    
+
     printf("\n\nDealing...\n\n");
 
     // Play war by dealing the deck evenly to 2 hands
@@ -696,7 +693,7 @@ int main(int argc, const char * argv[])
     // really want to move the card data, just its reference.
     Card *pHandA = deck.deal();
     Card *pHandB = deck.deal();
-    
+
     // Deal the rest of the cards until the deck is empty
     // May want to create a dealer that can handle multiple hands
     // and input to decide how much to deal.
@@ -711,7 +708,7 @@ int main(int argc, const char * argv[])
         {
             break;
         }
-        
+
         pNext = deck.deal();
         if(pNext != NULL)
         {
@@ -722,37 +719,37 @@ int main(int argc, const char * argv[])
             break;
         }
     }
-    
+
     printf("\n\nHand A\n");
     pHandA->showCards();
-    
+
     printf("\n\nHand B\n");
     pHandB->showCards();
-    
+
     // Pull the first two cards
     // To prevent needing to traverse the list each time
     // we will retain some information in each pass
-    
+
     Card *pTopA = pHandA->getFirst();
     Card *pTopB = pHandB->getFirst();
-    
+
     Card *pNextA = pTopA->getNext();
     Card *pNextB = pTopB->getNext();
-    
+
     Card *pLastA = pTopA->getLast();
     Card *pLastB = pTopB->getLast();
-    
+
     Card *pDiscardA = pTopA->remove();
     Card *pDiscardB = pTopB->remove();
 
     Card *pNextDiscardToReturn[2];
-    
+
     pTopA = pNextA;
     pNextA = pNextA->getNext();
-    
+
     pTopB = pNextB;
     pNextB = pNextB->getNext();
-    
+
     unsigned int cycleCount = 0;
     while (((pTopA != NULL)     &&
             (pTopB != NULL))
@@ -761,12 +758,12 @@ int main(int argc, const char * argv[])
             (pDiscardB != NULL)))
     {
         ++cycleCount;
-        
+
         unsigned int countA = pTopA==NULL?0:pTopA->count();
         unsigned int countB = pTopB==NULL?0:pTopB->count();
         unsigned int discardCountA = pDiscardA==NULL?0:pDiscardA->count();
         unsigned int discardCountB = pDiscardB==NULL?0:pDiscardB->count();
-        
+
         // Play war
         if (pDiscardA->getRank() > pDiscardB->getRank())
         {
@@ -777,15 +774,15 @@ int main(int argc, const char * argv[])
                    discardCountB,
                    countA + countB + discardCountA + discardCountB,
                    cycleCount);
-            
+
             // Put both cards in Hand A and update the discard piles
             // Randomly select which to do first to prevent the cards
             // from sorting themselves into a war-free configuration
             unsigned int aOrB = rand() % 2;
-            
+
             pNextDiscardToReturn[aOrB & 0x1] = pDiscardA;
             pNextDiscardToReturn[~aOrB & 0x1] = pDiscardB;
-            
+
             for (unsigned int i = 0; i < DIM(pNextDiscardToReturn); ++i)
             {
                 while (pNextDiscardToReturn[i] != NULL)
@@ -804,11 +801,11 @@ int main(int argc, const char * argv[])
                     }
                 }
             }
-            
+
             pNextA = pTopA->getNext();
             pDiscardA = NULL;
             pDiscardB = NULL;
-            
+
         }
         else if (pDiscardA->getRank() < pDiscardB->getRank())
         {
@@ -819,15 +816,15 @@ int main(int argc, const char * argv[])
                    discardCountB,
                    countA + countB + discardCountA + discardCountB,
                    cycleCount);
-            
+
             // Put both cards in Hand B and update the discard piles
             // Randomly select which to do first to prevent the cards
             // from sorting themselves into a war-free configuration
             unsigned int aOrB = rand() % 2;
-            
+
             pNextDiscardToReturn[aOrB & 0x1] = pDiscardB;
             pNextDiscardToReturn[~aOrB & 0x1] = pDiscardA;
-            
+
             for (unsigned int i = 0; i < DIM(pNextDiscardToReturn); ++i)
             {
                 while (pNextDiscardToReturn[i] != NULL)
@@ -846,7 +843,7 @@ int main(int argc, const char * argv[])
                     }
                 }
             }
-            
+
             pNextB = pTopB->getNext();
             pDiscardA = NULL;
             pDiscardB = NULL;
@@ -860,20 +857,20 @@ int main(int argc, const char * argv[])
                    discardCountB,
                    countA + countB + discardCountA + discardCountB,
                    cycleCount);
-            
+
             // Put a new card on top of each discard pile
             if ((pTopA != NULL) &&
                 (pDiscardA != NULL))
             {
                 pDiscardA = pDiscardA->insertBefore(pTopA->remove());
             }
-            
+
             if ((pTopB != NULL) &&
                 (pDiscardA != NULL))
             {
                 pDiscardB = pDiscardB->insertBefore(pTopB->remove());
             }
-            
+
             pTopA = pNextA;
             if (pNextA != NULL)
             {
@@ -883,7 +880,7 @@ int main(int argc, const char * argv[])
             {
                 pLastA = NULL;
             }
-            
+
             pTopB = pNextB;
             if (pNextB != NULL)
             {
@@ -894,7 +891,7 @@ int main(int argc, const char * argv[])
                 pLastB = NULL;
             }
         }
-        
+
         // Pull two more cards if we know we
         // can play another round
         if ((pTopA != NULL) &&
@@ -914,7 +911,7 @@ int main(int argc, const char * argv[])
                     pDiscardA = pDiscardA->insertBefore(pTopA->remove());
                 }
             }
-            
+
             if (pDiscardB == NULL)
             {
                 if (pTopB != NULL)
@@ -929,7 +926,7 @@ int main(int argc, const char * argv[])
                     pDiscardB = pDiscardB->insertBefore(pTopB->remove());
                 }
             }
-            
+
             pTopA = pNextA;
             if (pNextA != NULL)
             {
@@ -939,7 +936,7 @@ int main(int argc, const char * argv[])
             {
                 pLastA = NULL;
             }
-            
+
             pTopB = pNextB;
             if (pNextB != NULL)
             {
@@ -951,8 +948,8 @@ int main(int argc, const char * argv[])
             }
         }
     }
-    
-    
+
+
     if (pTopA != NULL)
     {
         printf("A CARDS--------\n");
@@ -974,13 +971,13 @@ int main(int argc, const char * argv[])
         pDiscardB->showCards();
     }
     printf("%s Wins in %d draws!\n", (pTopA == NULL)?"B":"A", cycleCount);
-    
+
 //    printf("Gathering Deck...\n");
 //    deck.gather();
 //    deck.showCards();
 
     DELETE_POINTER(pDeck);
-    
+
     return 0;
 }
 
