@@ -1,10 +1,11 @@
-//
-//  main.cpp
-//  Mapping
-//
-//  Created by MTKessel on 6/15/14.
-//  Copyright (c) 2014 Kessel. All rights reserved.
-//
+//============================================================================
+// Name        : Mapping.cpp
+// Author      : RocketRedNeck
+// Version     :
+// Copyright   : (c) 2014 RocketRedNeck and MIT License
+// Description : Mapping experiments
+//============================================================================
+
 
 #include <stdio.h>
 #include <math.h>
@@ -109,7 +110,7 @@ template <typename T> T round(const T &x)
     {
         retval = ceil(retval - 0.5);
     }
-    
+
     return retval;
 }
 
@@ -145,7 +146,7 @@ vec vmadd(vec a, double s, vec b)
  similarly,
  x0 X dy + a * (dx X dy) == y0 X dy
  there is an intersection iff 0 <= a <= 1 and 0 <= b <= 1
- 
+
  returns: 1 for intersect, -1 for not, 0 for hard to say (if the intersect
  point is too close to y0 or y1)
  */
@@ -154,17 +155,17 @@ int intersect(vec x0, vec x1, vec y0, vec y1, double tol, vec *sect)
 	vec dx = vsub(x1, x0), dy = vsub(y1, y0);
 	double d = vcross(dy, dx), a;
 	if (!d) return 0; /* edges are parallel */
-    
+
 	a = (vcross(x0, dx) - vcross(y0, dx)) / d;
 	if (sect)
 		*sect = vmadd(y0, a, dy);
-    
+
 	if (a < -tol || a > 1 + tol) return -1;
 	if (a < tol || a > 1 - tol) return 0;
-    
+
 	a = (vcross(x0, dy) - vcross(y0, dy)) / d;
 	if (a < 0 || a > 1) return -1;
-    
+
 	return 1;
 }
 
@@ -175,7 +176,7 @@ double dist(vec x, vec y0, vec y1, double tol)
 	vec dy = vsub(y1, y0);
 	vec x1, s;
 	int r;
-    
+
 	x1.x = x.x + dy.y; x1.y = x.y - dy.x;
 	r = intersect(x, x1, y0, y1, tol, &s);
 	if (r == -1) return HUGE_VAL;
@@ -191,16 +192,16 @@ int inside(vec v, polygon p, double tol)
 	int i, k, crosses, intersectResult;
 	vec *pv;
 	double min_x, max_x, min_y, max_y;
-    
+
 	for (i = 0; i < p->n; i++) {
 		k = (i + 1) % p->n;
 		min_x = dist(v, p->v[i], p->v[k], tol);
 		if (min_x < tol) return 0;
 	}
-    
+
 	min_x = max_x = p->v[0].x;
 	min_y = max_y = p->v[1].y;
-    
+
 	/* calculate extent of polygon */
 	for_v(i, pv, p) {
 		if (pv->x > max_x) max_x = pv->x;
@@ -210,26 +211,26 @@ int inside(vec v, polygon p, double tol)
 	}
 	if (v.x < min_x || v.x > max_x || v.y < min_y || v.y > max_y)
 		return -1;
-    
+
 	max_x -= min_x; max_x *= 2;
 	max_y -= min_y; max_y *= 2;
 	max_x += max_y;
-    
+
 	vec e;
 	while (1) {
 		crosses = 0;
 		/* pick a rand point far enough to be outside polygon */
 		e.x = v.x + (1 + rand() / (RAND_MAX + 1.)) * max_x;
 		e.y = v.y + (1 + rand() / (RAND_MAX + 1.)) * max_x;
-        
+
 		for (i = 0; i < p->n; i++) {
 			k = (i + 1) % p->n;
 			intersectResult = intersect(v, e, p->v[i], p->v[k], tol, 0);
-            
+
 			/* picked a bad point, ray got too close to vertex.
              re-pick */
 			if (!intersectResult) break;
-            
+
 			if (intersectResult == 1) crosses++;
 		}
 		if (i == p->n) break;
@@ -257,7 +258,7 @@ int main(int argc, const char * argv[])
 {
 
     // Clear the grid and set a line at some radius for a test (i.e., a semi-circle)
-    
+
     for (int i = 0; i < UPPER_INDEX; ++i)
     {
         for (int j = 0; j < UPPER_INDEX; ++j)
@@ -266,67 +267,67 @@ int main(int argc, const char * argv[])
             if ((i == 0) || (i == UPPER_RANGE_INCH) || (j == 0) || (j == UPPER_RANGE_INCH))
             {
                 universe[i][j] = 127;
-                
+
                 simplerUniverse[i][j>>3] = setBit(simplerUniverse[i][j>>3],7-(j%8),true);
             }
             else
             {
                 universe[i][j] = 0;
-                
+
                 simplerUniverse[i][j>>3] = setBit(simplerUniverse[i][j>>3],7-(j%8),false);
-   
+
             }
         }
     }
-    
-    
+
+
     // Mark our current location
     // Round the indicies and offset to match our concept of "center"
     // i.e. in index form, 0 will be more negative and
     int currentJ = MIDDLE_INDEX + static_cast<int>(round(currentX_inch));
     int currentI = MIDDLE_INDEX - static_cast<int>(round(currentY_inch));
     universe[currentI][currentJ] = -1;
-    
+
     // Assuming we are at (currentX, currentY) scan the region
     // around us
     // For this example we place an artificial return at 10 inches from our
     // current location
-    for (int i = 0; i < DIM(radius_inch); ++i)
+    for (unsigned int i = 0; i < DIM(radius_inch); ++i)
     {
         radius_inch[i] = 10;
     }
-    
+
     // Now convert each radius into an (x,y) pair and tag that point in the grid
-    for (int i = 0; i < DIM(radius_inch); ++i)
+    for (unsigned int i = 0; i < DIM(radius_inch); ++i)
     {
-    
+
         // First compute the Cartesian coordinates of the data in the sensor reference frame
         double this_angle_deg = static_cast<double>(LOW_LIMIT_DEG + i);
         double this_angle_radian = this_angle_deg * DTR;
         double this_radius_in = static_cast<double>(radius_inch[i]);
         double xs_inch = this_radius_in * cos(this_angle_radian);
         double ys_inch = this_radius_in * sin(this_angle_radian);
-        
+
         // Rotate the coordinates from sensor reference to universe reference
         // This is done by multiplying the position vector of the sensed object
         // by the body to
         double xu_inch =  xs_inch * unitY + ys_inch * unitX;
         double yu_inch = -xs_inch * unitX + ys_inch * unitY;
-        
+
         // Transverse the detected position relative to the body center
         // into the universe reference frame
         xu_inch += currentX_inch;
         yu_inch += currentY_inch;
-        
+
         //printf("a = %f : r = %f : x = %f : y = %f\n", this_angle_deg, this_radius_in, xu_inch, yu_inch);
-        
+
         // Round the indicies and offset to match our concept of "center"
         // i.e. in index form, 0 will be more negative and
         int j_index = MIDDLE_INDEX + static_cast<int>(round(xu_inch));
         int i_index = MIDDLE_INDEX - static_cast<int>(round(yu_inch));
-        
+
         //printf("i = %d : j = %d\n", i_index, j_index);
-        
+
         // Limit the values to fit within the display grid
         if (i_index < 0)
         {
@@ -350,7 +351,7 @@ int main(int argc, const char * argv[])
         {
             ++universe[i_index][j_index];
         }
-        
+
         /// TODO: Still need to cast a ray from current position to the
         /// object we just found so we can clear any cells that may have
         /// been previously tagged as having an object. I.e., it is possible
@@ -361,65 +362,63 @@ int main(int argc, const char * argv[])
         /// the specific cell... i.e., + for each detect and - for each loss
         /// but no lower than zero
     }
-    
+
     // Now "display" the universe on the console
     for (int i = 0; i < UPPER_INDEX; ++i)
     {
         for (int j = 0; j < UPPER_INDEX; ++j)
         {
             //printf("%c ",universe[i][j]==-1?'X':universe[i][j]==127?'!':universe[i][j]>0?'*':'.');
-            
+
             printf("%c ",getBit(simplerUniverse[i][j>>3],7-(j%8))?'*':'.');
         }
         printf("\n");
     }
-    
+
     //printf("ux = %f : uy = %f\n",unitX, unitY);
-    
+
     // Example ray casting
     	vec vsq[] = {	{0,0}, {10,0}, {10,10}, {0,10},
             {2.5,2.5}, {7.5,0.1}, {7.5,7.5}, {2.5,7.5}};
-    
+
     	polygon_t sq = { 4, vsq }, /* outer square */
         sq_hole = { 8, vsq }; /* outer and inner square, ie hole */
-    
+
     	vec c = { 10, 5 }; /* on edge */
     	vec d = { 5, 5 };
-    
+
     	printf("%d\n", inside(c, &sq, 1e-10));
     	printf("%d\n", inside(c, &sq_hole, 1e-10));
-    
+
     	printf("%d\n", inside(d, &sq, 1e-10));	/* in */
     	printf("%d\n", inside(d, &sq_hole, 1e-10));  /* out (in the hole) */
-    
-    
-    // matrix tests
-    Matrix<long double> A(1806);
-    vector<long double> x(1806,1), y;
-    long double sum;
-    int n,k=0;
-    clock_t t0,tf;
-    cout.precision(17);
-    
-    n=init(A);
-    
-    //timed multiplication
-    t0=clock();
-    for(int i=0;i<1000;i++){ y=A*x; }
-    tf=clock()-t0;
-    
-    //output last element
-    cout << y[1805];
-    //output time to multiply
-    cout << "\n\n" << (double)tf/((double)(CLOCKS_PER_SEC)*(1000.0));
-    
-    //do naive multiply for last row to check last element of y
-    long double tmp=0;
-    for(int i=0;i<1806;i++) tmp+=A(1805,i);
-    cout << "\n" << tmp <<"\n";
-    
+
+
+//    // matrix tests
+//    Matrix<long double> A(1806);
+//    vector<long double> x(1806,1), y;
+//    long double sum;
+//    int n,k=0;
+//    clock_t t0,tf;
+//    cout.precision(17);
+//
+//    n=init(A);
+//
+//    //timed multiplication
+//    t0=clock();
+//    for(int i=0;i<1000;i++){ y=A*x; }
+//    tf=clock()-t0;
+//
+//    //output last element
+//    cout << y[1805];
+//    //output time to multiply
+//    cout << "\n\n" << (double)tf/((double)(CLOCKS_PER_SEC)*(1000.0));
+//
+//    //do naive multiply for last row to check last element of y
+//    long double tmp=0;
+//    for(int i=0;i<1806;i++) tmp+=A(1805,i);
+//    cout << "\n" << tmp <<"\n";
+
     return 0;
 }
-
-
 
