@@ -1,11 +1,48 @@
-//============================================================================
-// Name        : Mapping.cpp
-// Author      : RocketRedNeck
-// Version     :
-// Copyright   : (c) 2014 RocketRedNeck and MIT License
-// Description : Mapping experiments
-//============================================================================
-
+// Mapping.cpp
+//
+// Experiments in storing an environment mapping in a memory limited
+// environment (e.g., Arduino or similar)
+//
+// Both a word-oriented and a byte oriented "universe" is maintained.
+//
+// As the experiments continue we will explore speed and sizing issues
+// to assess the types of storage appropriate for small memory models.
+//
+// A sparse-matrix storage technique may be considered if the overhead
+// is sufficiently small for our needs.
+//
+// Until that time, the smallest storage will be a bit-oriented storage
+// representing a grid of arbitrary size (although here we may just
+// refer to them as square inches)
+//
+// ----------------------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------------------
+// Copyright (c) 2014 - RocketRedNeck
+//
+// RocketRedNeck and MIT License
+//
+// RocketRedNeck hereby grants license for others to copy and modify this source code for
+// whatever purpose other's deem worthy as long as RocketRedNeck is given credit where
+// where credit is due and you leave RocketRedNeck out of it for all other nefarious purposes.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+// ****************************************************************************************************
 
 #include <stdio.h>
 #include <math.h>
@@ -99,6 +136,7 @@ double unitX = cosine;
 double unitY = sine;
 
 // Simple template function for rounding
+// NOT optimal and generally may be uncessary
 template <typename T> T round(const T &x)
 {
     T retval = x;
