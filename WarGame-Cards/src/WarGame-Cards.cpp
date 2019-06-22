@@ -63,6 +63,15 @@
 // How many decks to run?
 unsigned int NUMBER_OF_DECKS = 1;
 
+int i;			// An uninitialized signed integer, initialized to 0 if global static
+int j = 0;		// An initialized signed integer
+int k[10];		// An uninitialized signed integer array, initialized to 0 if global static
+
+long l;
+long m = 0;
+long n[10];
+
+
 // Suit value is reverse alphabetical order such that spade is highest value
 // for games that care.
 // Value of jokers are determined by the specific game.
@@ -487,7 +496,7 @@ public:
     ~Deck()
     {
         // Deallocate memory
-        for (int i = 0; i < deckSize_; ++i)
+        for (unsigned int i = 0; i < deckSize_; ++i)
         {
             DELETE_POINTER(ppCards_[i]);
         }
