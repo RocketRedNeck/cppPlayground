@@ -61,7 +61,7 @@
 #define DELETE_POINTER_ARRAY(x) if (x!=NULL){ delete[] x; x=NULL;}
 
 // How many decks to run?
-unsigned int NUMBER_OF_DECKS = 1;
+unsigned int NUMBER_OF_DECKS = 10;
 
 int i;			// An uninitialized signed integer, initialized to 0 if global static
 int j = 0;		// An initialized signed integer
