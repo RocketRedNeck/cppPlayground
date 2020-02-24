@@ -31,6 +31,7 @@
 //CSI s	SCP	Save Cursor Position	Saves the cursor position / state.
 //CSI u	RCP	Restore Cursor Position	Restores the cursor position / state.
 
+// Only defining the ANSI.SYS compliant escape codes for cursor/display control
 #define ESC(n) "\033["#n
 #define ESC_UP(n) ESC(n)"A"
 #define ESC_DOWN(n) ESC(n)"B"
@@ -44,85 +45,126 @@
 #define ESC_ERASE_DISPLAY_AND_BUFFER	ESC_ERASE_DISPLAY_(3)
 #define ESC_ERASE_LINE_(n)				ESC(n)"K"
 #define ESC_ERASE_LINE_TO_END		    ESC_ERASE_LINE_(0)
-#define ESC_ERASE_LINE_TO_BEG		ESC_ERASE_LINE_(1)
+#define ESC_ERASE_LINE_TO_BEG			ESC_ERASE_LINE_(1)
+#define ESC_ERASE_LINE					ESC_ERASE_LINE_(2)
 
 
 
-//namespace traderInternals
-//{
-	std::default_random_engine generator;
-	std::uniform_int_distribution<int> distribution(0, 1);
 
-	auto coin = std::bind(distribution, generator);
+std::default_random_engine generator;		// Change as needed (e.g., can connect to hardware engine with is true random)
 
-	const uint64_t MAX_FLIPS = 10000000;
-	uint64_t count[2] = {}; // To demonstrate  random number generator for fairness
+std::uniform_int_distribution<int> coinDistribution(0, 1);
+auto coin = std::bind(coinDistribution, generator);
 
-	const uint64_t MAX_TRADERS = 1000;
-	const uint64_t MAX_TRADES  = 1000000000;
-	std::uniform_int_distribution tradeDistribution((uint64_t)0, MAX_TRADERS);
-	auto selectTrader = std::bind(tradeDistribution, generator);
+const uint64_t MAX_FLIPS = 10000000;
+uint64_t count[2] = {}; // To demonstrate  random number generator for fairness
 
-	const uint64_t SEED_MONEY = 1000;
-	uint64_t trader[MAX_TRADERS] = {};
+const uint64_t MAX_TRADERS = 1000;
+const uint64_t MAX_TRADES  = 1000000000;
+std::uniform_int_distribution tradeDistribution((uint64_t)0, MAX_TRADERS);
+auto selectTrader = std::bind(tradeDistribution, generator);
 
-	const uint64_t MAX_BINS = 35;
-	const uint64_t LARGEST_BIN = static_cast<uint64_t>(3.5 * SEED_MONEY);
-	const uint64_t BIN_SIZE = LARGEST_BIN / MAX_BINS;
-	uint64_t hist[MAX_BINS] = {};
+const uint64_t SEED_MONEY = 1000;
+uint64_t trader[MAX_TRADERS] = {};
+struct Stats
+{
+	uint64_t wins;
+	uint64_t losses;
+};
+Stats stats[MAX_TRADERS] = {};
 
-	uint64_t winners = 0;
-	uint64_t losers = 0;
-	uint64_t disenfranchised = 0;
+const uint64_t MAX_BINS = 35;
+const uint64_t LARGEST_BIN = static_cast<uint64_t>(3.5 * SEED_MONEY);
+const uint64_t BIN_SIZE = LARGEST_BIN / MAX_BINS;
+uint64_t hist[MAX_BINS] = {};
 
-	uint64_t scale = 8;
+uint64_t winners = 0;
+uint64_t losers = 0;
+uint64_t disenfranchised = 0;
 
-//}
-//using namespace traderInternals;
+uint64_t scale = 8;
+
+const bool TAX_ENABLED = false;
+const uint64_t TAX_BOUNDARY = 10000;
+
 
 #define DIM(x) (sizeof(x)/sizeof(x[0]))
 
+void demoCoinFairness(void)
+{
+	printf("Demonstrating coin fairness...\n");
+
+	for (uint64_t i = 0; i < MAX_FLIPS; ++i)
+	{
+		coin() ? ++count[1] : ++count[0];
+		if ((i % (MAX_FLIPS / 100)) == 0)
+		{
+			printf("\r%3llu %% complete : n = %8llu : count[0] = %8llu : count[1] = %8llu", i*100/MAX_FLIPS, i, count[0], count[1]);
+		}
+	}
+
+	printf("\r100 %% complete : n = %8llu : count[0] = %8llu : count[1] = %8llu\n", MAX_FLIPS, count[0], count[1]);
+
+	printf("\n");
+}
+
+void executeTaxModel(void)
+{
+	// Collect graduated tax for any above median
+	// Distribute inverse proportionally to any below median to bring 
+}
+
 int main()
 {
-		
-	//printf("Demonstrating coin fairness...\n");
+	// Uncomment if needed to convince someone
+	// demoCoinFairness();
 
-	//for (uint64_t i = 0; i < MAX_FLIPS; ++i)
-	//{
-	//	coin() ? ++count[1] : ++count[0];
-	//	if ((i % (MAX_FLIPS / 100)) == 0)
-	//	{
-	//		printf("\r%3u %% complete : n = %8u : count[0] = %8u : count[1] = %8u", i*100/MAX_FLIPS, i, count[0], count[1]);
-	//	}
-	//}
-
-	//printf("\r100 %% complete : n = %8u : count[0] = %8lu : count[1] = %8u\n", MAX_FLIPS, count[0], count[1]);
-
-	//printf("\n");
-
+	// Start every trader with the same balance
 	for (uint64_t i = 0; i < DIM(trader); ++i)
 	{
 		trader[i] = SEED_MONEY;
 	}
 
+	// Run billions of trading opportunities
 	for (uint64_t i = 0; i < MAX_TRADES; ++i)
 	{
-
-		auto a = selectTrader();
-		auto b = selectTrader();
-		// Once a trader is disenfrachised there is no play
-		if (trader[a] && trader[b])
+		// If taxation and redistribute model is active then
+		// run it now
+		if (TAX_ENABLED)
 		{
-			if (coin())
+			if ((i % TAX_BOUNDARY) == 0)
 			{
-				++trader[a];
-				--trader[b];
+				// The taxman collects and redistributes
+				executeTaxModel();
 			}
-			else
-			{
-				--trader[a];
-				++trader[b];
-			}
+
+		}
+		// Randomly select two traders
+		// Once a trader is disenfrachised there is no play
+		auto a = selectTrader();
+		while (trader[a] == 0)
+		{
+			a = selectTrader();
+		}
+		auto b = selectTrader();
+		while ((a == b) || (trader[b] == 0))
+		{
+			b = selectTrader();
+		}
+
+		if (coin())
+		{
+			++trader[a];
+			--trader[b];
+			stats[a].wins++;
+			stats[b].losses++;
+		}
+		else
+		{
+			--trader[a];
+			++trader[b];
+			stats[b].wins++;
+			stats[a].losses++;
 		}
 
 		if ((i % (MAX_TRADES / 100000)) == 0)
@@ -159,9 +201,9 @@ int main()
 			}
 
 			// Display histogram
-			printf(ESC_ERASE_DISPLAY_AND_BUFFER);//clear screen
 			printf(ESC_POS(1,1));//Top left corner
-			printf("%.2f %% of %llu trades complete\n", (double)(i * 100) / (double)MAX_TRADES, MAX_TRADES);
+			printf(ESC_ERASE_LINE_TO_END);
+			printf("%.3f %% of %llu trades complete\n", (double)(i * 100) / (double)MAX_TRADES, MAX_TRADES);
 
 			uint64_t maxHist = 0;
 			for (int64_t j = (MAX_BINS-1); j >= 0; j--)
