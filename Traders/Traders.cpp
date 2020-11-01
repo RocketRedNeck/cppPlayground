@@ -61,8 +61,8 @@ uint64_t count[2] = {}; // To demonstrate  random number generator for fairness
 
 const uint64_t MAX_TRADERS = 1000;
 const uint64_t MAX_TRADES  = 1000000000;
-std::uniform_int_distribution tradeDistribution((uint64_t)0, MAX_TRADERS);
-auto selectTrader = std::bind(tradeDistribution, generator);
+std::uniform_int_distribution<uint64_t> tradeDistribution((uint64_t)0, MAX_TRADERS);
+auto selectTrader = std::bind<uint64_t>(tradeDistribution, generator);
 
 const uint64_t SEED_MONEY = 1000;
 uint64_t trader[MAX_TRADERS] = {};
@@ -108,10 +108,17 @@ void demoCoinFairness(void)
 	printf("\n");
 }
 
+void executeIncomeModel(void)
+{
+	// Create an influx of wealth (i.e., a growth in GDP-like value)
+
+}
+
 void executeTaxModel(void)
 {
 	// Collect graduated tax for any above median
-	// Distribute inverse proportionally to any below median to bring 
+	// Distribute inverse proportionally to any below median to bring
+	// traders to minimum standard of living
 }
 
 int main()
@@ -134,6 +141,8 @@ int main()
 		{
 			if ((i % TAX_BOUNDARY) == 0)
 			{
+				executeIncomeModel();
+
 				// The taxman collects and redistributes
 				executeTaxModel();
 			}
