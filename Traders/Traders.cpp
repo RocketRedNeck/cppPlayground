@@ -64,7 +64,7 @@ const uint64_t MAX_TRADES  = 1000000000;
 std::uniform_int_distribution<uint64_t> tradeDistribution((uint64_t)0, MAX_TRADERS);
 auto selectTrader = std::bind<uint64_t>(tradeDistribution, generator);
 
-const uint64_t SEED_MONEY = 1000;
+const uint64_t SEED_MONEY = 5000;
 uint64_t trader[MAX_TRADERS] = {};
 struct Stats
 {
@@ -74,7 +74,7 @@ struct Stats
 Stats stats[MAX_TRADERS] = {};
 
 const uint64_t MAX_BINS = 35;
-const uint64_t LARGEST_BIN = static_cast<uint64_t>(3.5 * SEED_MONEY);
+const uint64_t LARGEST_BIN = static_cast<uint64_t>(2.0 * SEED_MONEY);
 const uint64_t BIN_SIZE = LARGEST_BIN / MAX_BINS;
 uint64_t hist[MAX_BINS] = {};
 
