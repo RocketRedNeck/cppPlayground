@@ -35,6 +35,7 @@ template <typename PRIMITIVE_TYPE, class STATUS_ENUM_TYPE = StatusCode>
 class Result
 {
 public:
+    using Result_t = Result<PRIMITIVE_TYPE, STATUS_ENUM_TYPE>;
     using Value_t = PRIMITIVE_TYPE;
     using Status_t = STATUS_ENUM_TYPE;
 
@@ -59,6 +60,28 @@ public:
         : value_(static_cast<PRIMITIVE_TYPE>(0))
         , status_(status)
     {   
+    }
+
+    /// @brief Assignment to pass back value with Ok status
+    /// @param value the value being returned
+    /// @return this object with the value and status set
+    Result_t& operator=(const PRIMITIVE_TYPE& value)
+    {
+        value_ = value;
+        status_ = STATUS_ENUM_TYPE::Ok;
+
+        return *this;
+    }
+
+    /// @brief Assignment to pass back status with a default 0 value
+    /// @param status the status being returned
+    /// @return this object with the value and status set
+    Result_t& operator=(const STATUS_ENUM_TYPE& status)
+    {
+        value_ = static_cast<PRIMITIVE_TYPE>(0);
+        status_ = status;
+
+        return *this;
     }
 
     /// @brief Returns `true` if result is okay to use
@@ -102,6 +125,7 @@ public:
     {
         return isOk();
     }
+
 };
 
 /// @brief Example user-defined status codes
@@ -145,21 +169,29 @@ public:
     /// @details Status is `Err` for `x == 0`, `NewError` for `x == 123`, `Ok` otherwise
     Result_t f(const PRIMITIVE_TYPE& x)
     {
+        Result_t retval(UserStatusCode::AnotherError);
+
         if (x)
         {
             if (static_cast<int>(x) == 123)
             {
-                return Result_t(UserStatusCode::NewError);
+                retval = UserStatusCode::NewError;
+            }
+            else if (x < static_cast<PRIMITIVE_TYPE>(0))
+            {
+                ; // nothing else to do
             }
             else
             {
-                return Result_t(x);
+                retval = x;;
             }
         }
         else
         {
-            return Result_t(UserStatusCode::Err);
+            retval = UserStatusCode::Err;
         }
+
+        return retval;
     }    
 };
 
@@ -204,6 +236,8 @@ int main()
 
     printf("cr: value = %u status = %s\n",cr.value(), toString(cr.status()));
 
+    br = b.f(-1);
+    printf("br: value = %f status = %s\n",br.value(), toString(br.status()));
 
 
     return 0;
