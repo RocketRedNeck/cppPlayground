@@ -26,6 +26,9 @@
             "label": "C/C++: cl.exe build active file",
             "command": "cl.exe",
             "args": [
+                "/Zc:__cplusplus",  // force MSVC to display real standard version
+                "/Wall",
+                "/wd4820",  // Disable pad warnings
                 "/Zi",
                 "/EHsc",
                 "/nologo",

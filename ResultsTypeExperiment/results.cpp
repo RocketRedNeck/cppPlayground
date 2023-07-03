@@ -1,12 +1,12 @@
 
-#include <cstdio>
 #include <cstdint>
+#include <cstdio>
 
 #define CASE_STRING(x) case x: return #x
 #define DEFAULT_STRING default: return "UNKNOWN"
 
 /// @brief Basic enumeration of status for use with the \ref Result type
-enum class StatusCode
+enum class StatusCode : uint32_t
 {
     Ok, ///< All is well. Every user defined enumeration must provide this to be used by \ref Result
     Err ///< Something is wrong. User-defined enumerations should create variations with more details, but this is the minimum
@@ -129,7 +129,7 @@ public:
 };
 
 /// @brief Example user-defined status codes
-enum class UserStatusCode 
+enum class UserStatusCode : uint32_t
 {
     Ok,
     Err,
@@ -197,7 +197,7 @@ public:
 
 int main()
 {
-    printf("Hello, Results!\n");
+    printf("Hello, Results! %ld\n",__cplusplus);
     SomeClass<int> a;
     SomeClass<double> b;
     SomeClass<uint32_t> c;
